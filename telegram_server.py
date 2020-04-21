@@ -1554,7 +1554,11 @@ def unauthed(update, context):
 
 # main thing - bot connecting, conversation handler, polling
 if __name__ == "__main__":
-    FLASK_SERVER = "http://b4a1b568.ngrok.io"
+    flask_server = sys.argv[1]
+    if flask_server[-1] == '/':
+        flask_server = flask_server[:-1]
+    print(f"Flask Server url was given: {flask_server}")
+    FLASK_SERVER = flask_server
     # REQUEST_KWARGS = {
     #     'proxy_url': 'socks5://localhost:9150',  # Адрес прокси сервера
     # }
