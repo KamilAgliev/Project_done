@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """MyEng - Телеграм бот для узучения английского языка"""
 
+# Imports
 import random
 import sys
 
@@ -13,6 +14,7 @@ sessionStorage = {}
 from telegram.ext import Updater, MessageHandler, Filters, ConversationHandler
 from telegram.ext import CommandHandler
 
+# GLOBAL VARIABLES
 WORDS_FOR_LEARNING = {
     'путешествия': {
         "inception": "Одной из причин, по которой человек решает выучить или "
@@ -233,7 +235,7 @@ WORDS_FOR_LEARNING = {
              "words": [['Where is the nearest souvenir shop / shopping mall / market? ',
                         'Где находится ближайший сувенирный магазин / торговый центр / рынок?'],
                        ['Sorry, can you help me, please? ', 'Прошу прощения, вы можете мне помочь?'],
-                       ['How much is it? ', 'How much is it?'],
+                       ['How much is it?', 'Сколько это стоит?'],
                        ['How much does it cost? ', 'Сколько это стоит?'],
                        ['Do you have a special offer? ', 'У вас есть специальное предложение?'],
                        ['Are there any discounts? ', 'А скидки есть?'],
@@ -720,6 +722,7 @@ reply_keyboard = [['путешествия'],
 aims_markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
 
 
+# register form like in html
 class RegisterForm:
     stages = [
         "Введите своё имя",
@@ -746,6 +749,7 @@ class RegisterForm:
         self.aim = ""
 
 
+# user register function
 def register(update, context):
     mes = update.message.text.strip()
     user_id = update.message.from_user.id
@@ -794,7 +798,12 @@ def register(update, context):
                     return 1
                 sessionStorage[user_id]["reg_form"].password_again = mes
             if stage == 6:
-                sessionStorage[user_id]["reg_form"].age = int(mes)
+                s = str(mes)
+                if s.isdigit():
+                    sessionStorage[user_id]["reg_form"].age = int(mes)
+                else:
+                    update.message.reply_text("Введите число!")
+                    return 1
             if stage == 7:
                 sessionStorage[user_id]["reg_form"].address = mes
         if stage == 7:
@@ -853,6 +862,7 @@ def register(update, context):
     return learning(update, context)
 
 
+# login user into bot system (like auth)
 def login(update, context):
     mes = update.message.text.strip()
     user_id = update.message.from_user.id
@@ -877,6 +887,7 @@ def login(update, context):
             return 2
 
 
+# beginning phase of dialog
 def start(update, context):
     update.message.reply_text("Я работаю!")
     user_id = update.message.from_user.id
@@ -895,6 +906,7 @@ def start(update, context):
         return register(update, context)
 
 
+# user's cabinet, place to call functions
 def learning(update, context):
     user_id = update.message.from_user.id
     update.message.reply_text("Вы в личном кабинете,"
@@ -903,11 +915,13 @@ def learning(update, context):
     return 3
 
 
+# Get out of bot's system
 def logout(update, context):
     update.message.reply_text("Вы вышли из аккаунта, чтобы начать работу выполните команду /start")
     return ConversationHandler.END
 
 
+# to get all commands for current place
 def learning_help(update, context):
     text = """"""
     for com in commands['learning_menu']:
@@ -916,6 +930,7 @@ def learning_help(update, context):
     return 3
 
 
+# other links dialog phase
 def get_other_links(update, context):
     user_id = update.message.from_user.id
     mes = update.message.text.strip()
@@ -944,6 +959,7 @@ def get_other_links(update, context):
     return 4
 
 
+# get other users to chat with
 def get_people_to_chat(update, context):
     res = get(f"{FLASK_SERVER}/api/users").json()
     text = "Вот люди, с которыми с ты можешь пообщаться." \
@@ -967,6 +983,7 @@ def get_people_to_chat(update, context):
     update.message.reply_text(text)
 
 
+# get sections information: themes, descriptions
 def get_section_info(update, context):
     user_id = update.message.from_user.id
     curr_section = 1
@@ -986,6 +1003,7 @@ def get_section_info(update, context):
     update.message.reply_text(text)
 
 
+# lesson stage, themes and test can be made here
 def get_lesson(update, context):
     user_id = update.message.from_user.id
     mes = update.message.text.strip()
@@ -1148,6 +1166,7 @@ def get_lesson(update, context):
     return 5
 
 
+# get themes to learn
 def get_all_themes(update, context):
     user_id = update.message.from_user.id
     text = "Вот темы на выбор:"
@@ -1164,6 +1183,7 @@ def get_all_themes(update, context):
     update.message.reply_text(text)
 
 
+# get command in lesson stage
 def help_in_lesson(update, context):
     text = """"""
     for com in commands['lesson_menu']:
@@ -1172,6 +1192,7 @@ def help_in_lesson(update, context):
     return 5
 
 
+# change learning aim stage
 def change_aim(update, context):
     user_id = update.message.from_user.id
     mes = update.message.text.strip().lower()
@@ -1220,6 +1241,7 @@ def change_aim(update, context):
         return learning(update, context)
 
 
+# return test for some theme, also works with database
 def get_test(user_id):
     section = sessionStorage[user_id]['curr_section']
     theme = sessionStorage[user_id]['curr_lesson']['title']
@@ -1233,7 +1255,7 @@ def get_test(user_id):
         sam = random.sample(words, k=min(len(words), random.randint(5, 10)))
         test = []
         if 'curr_q_id' not in sessionStorage.keys():
-            sessionStorage["curr_q_id"] = 1
+            sessionStorage["curr_q_id"] = 25
         questions = ""
         passed_users = str(user_id)
         curr_q_id = sessionStorage['curr_q_id']
@@ -1277,6 +1299,7 @@ def get_test(user_id):
         return test
 
 
+# get users on map
 def get_myeng_map(update, context):
     users = get(f"{FLASK_SERVER}/api/users").json()['users']
     marks = ""
@@ -1316,6 +1339,7 @@ def get_myeng_map(update, context):
     )
 
 
+# stop translating stage if users says
 def stop_translating(update, context):
     user_id = update.message.from_user.id
     if sessionStorage[user_id]['conv_stage'] == 3:
@@ -1325,18 +1349,21 @@ def stop_translating(update, context):
         return 5
 
 
+# change translator lang to (from en to ru)
 def switch_to_from_en_to_ru(update, context):
     update.message.reply_text("Введите что нибудь для перевода c английского на русский",
                               reply_markup=ReplyKeyboardMarkup([['назад']], one_time_keyboard=True))
     return 9
 
 
+# change translator lang to (from ru to en)
 def switch_to_from_ru_to_en(update, context):
     update.message.reply_text("Введите что нибудь для перевода с русского на английский",
                               reply_markup=ReplyKeyboardMarkup([['назад']], one_time_keyboard=True))
     return 8
 
 
+# translate from en to ru
 def from_en_to_ru(update, context):
     eng_text = update.message.text.strip()
     if eng_text == 'назад':
@@ -1353,10 +1380,12 @@ def from_en_to_ru(update, context):
         reply_markup=ReplyKeyboardMarkup([['назад']], one_time_keyboard=True))
 
 
+# get back to cabinet
 def return_to_cabinet(update, context):
     return learning(update, context)
 
 
+# translate from ru to en
 def from_ru_to_en(update, context):
     ru_text = update.message.text.strip()
     if ru_text == 'назад':
@@ -1372,6 +1401,7 @@ def from_ru_to_en(update, context):
         , reply_markup=ReplyKeyboardMarkup([['назад']], one_time_keyboard=True))
 
 
+# to do some theme test outside lesson
 def run_test(update, context):
     user_id = update.message.from_user.id
     mes = update.message.text.strip()
@@ -1417,7 +1447,7 @@ def run_test(update, context):
         # показать все темы, предоставить выбор
         get_all_themes(update, context)
         update.message.reply_text("Чтобы начать тест по какой-либо теме, напишите её."
-                                  "\n(строго как в сообщении. Подождите, тест генерируется."
+                                  "\n(строго как в сообщении."
                                   "\nВы также можете написать 'назад' для возвращения в личный кабинет",
                                   reply_markup=themes_markup)
         sessionStorage[user_id]['anss_given'] = []
@@ -1425,7 +1455,6 @@ def run_test(update, context):
 
         return 10
     elif sessionStorage[user_id]['test_stage'] == 0:
-        from data.english_data import WORDS_FOR_LEARNING
         theme = mes.strip()
         found = 0
         sessionStorage[user_id]['curr_lesson'] = None
@@ -1446,7 +1475,7 @@ def run_test(update, context):
                                       " поэтому здесь нет слов для теста", reply_markup=themes_markup_beg_test)
             return 10
         update.message.reply_text("Сейчас мы зададим вам несколько вопросов,"
-                                  " а вы будете на них отвечать. \n Пожалуйста подождите пока сгенерируеться тест")
+                                  " а вы будете на них отвечать.\nПожалуйста подождите пока сгенерируеться тест")
         sessionStorage[user_id]['test'] = get_test(user_id)
         sessionStorage[user_id]['anss_given'] = []
         update.message.reply_text(sessionStorage[user_id]['test'][0][0],
@@ -1487,6 +1516,7 @@ def run_test(update, context):
             return 10
 
 
+# stops test if user says
 def stop_test(update, context):
     user_id = update.message.from_user.id
     text = f"Вот результаты теста: \n"
@@ -1517,10 +1547,12 @@ def stop_test(update, context):
     return 10
 
 
+# if user not in bot's system
 def unauthed(update, context):
     update.message.reply_text("Вы не авторизованы, чтобы начать работу выполните команду /start")
 
 
+# main thing - bot connecting, conversation handler, polling
 if __name__ == "__main__":
     FLASK_SERVER = "http://b4a1b568.ngrok.io"
     # REQUEST_KWARGS = {
