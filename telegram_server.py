@@ -1417,7 +1417,7 @@ def run_test(update, context):
         # показать все темы, предоставить выбор
         get_all_themes(update, context)
         update.message.reply_text("Чтобы начать тест по какой-либо теме, напишите её."
-                                  "\n(строго как в сообщении)"
+                                  "\n(строго как в сообщении. Подождите, тест генерируется."
                                   "\nВы также можете написать 'назад' для возвращения в личный кабинет",
                                   reply_markup=themes_markup)
         sessionStorage[user_id]['anss_given'] = []
@@ -1522,11 +1522,7 @@ def unauthed(update, context):
 
 
 if __name__ == "__main__":
-    flask_server = sys.argv[1]
-    if flask_server[-1] == '/':
-        flask_server = flask_server[:-1]
-    print(f"Flask Server url was given: {flask_server}")
-    FLASK_SERVER = flask_server
+    FLASK_SERVER = "http://b4a1b568.ngrok.io"
     # REQUEST_KWARGS = {
     #     'proxy_url': 'socks5://localhost:9150',  # Адрес прокси сервера
     # }
