@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """MyEng - Телеграм бот для узучения английского языка"""
-
+# Imports
 from flask import jsonify
 from flask import Flask
 from flask_ngrok import run_with_ngrok
@@ -9,6 +9,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import Session
 import sqlalchemy.ext.declarative as dec
 
+# db_session here
 SqlAlchemyBase = dec.declarative_base()
 
 __factory = None
@@ -36,6 +37,7 @@ def create_session() -> Session:
     return __factory()
 
 
+# tables in database
 import datetime
 import sqlalchemy
 from flask_login import UserMixin
@@ -43,6 +45,7 @@ from sqlalchemy import orm
 from sqlalchemy_serializer import SerializerMixin
 
 
+# User class
 class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'users'
 
@@ -57,6 +60,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     password = sqlalchemy.Column(sqlalchemy.String)
 
 
+# Test class
 class Test(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'tests'
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
@@ -65,6 +69,7 @@ class Test(SqlAlchemyBase, UserMixin, SerializerMixin):
     passed_users = sqlalchemy.Column(sqlalchemy.String)
 
 
+# Question class
 class Question(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'questions'
 
@@ -74,14 +79,17 @@ class Question(SqlAlchemyBase, UserMixin, SerializerMixin):
     ans = sqlalchemy.Column(sqlalchemy.String)  # на английском
 
 
+# flask app defining (with ngrok)
 app = Flask(__name__)
 run_with_ngrok(app)
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=365)
 app.config['SECRET_KEY'] = 'my_secret'
 
+# making api from it
 api = Api(app)
 
 
+# loging user into system
 def log_user(user_id, given_password):
     ses = create_session()
     user = ses.query(User).filter(User.id == user_id).first()
@@ -91,6 +99,7 @@ def log_user(user_id, given_password):
         return jsonify({"message": "something wrong"})
 
 
+# to get user(get) and delete user
 class UsersResource(Resource):
     def get(self, user_id):
         session = create_session()
@@ -109,6 +118,7 @@ class UsersResource(Resource):
         return jsonify({'message': 'ok, user successfully deleted'})
 
 
+# to get list of users and add user
 class UsersListResource(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('id', type=int, required=True)
@@ -149,6 +159,7 @@ class UsersListResource(Resource):
         return jsonify({'success': 'OK - the user has been added'})
 
 
+# to add questions
 class QuestionListResource(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('id', type=int)
@@ -170,6 +181,7 @@ class QuestionListResource(Resource):
         return jsonify({"message": 'ok - question added'})
 
 
+# to get questions
 class QuestionResource(Resource):
     def get(self, ques_id):
         session = create_session()
@@ -179,6 +191,7 @@ class QuestionResource(Resource):
         return jsonify({'question': ques.to_dict()})
 
 
+# to add Test
 class TestsListResource(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('id', type=int)
@@ -200,6 +213,7 @@ class TestsListResource(Resource):
         return jsonify({"message": "ok - test added"})
 
 
+# to get test by the theme
 class TestsResource(Resource):
     def get(self, theme, user_id):
         session = create_session()
@@ -214,7 +228,9 @@ class TestsResource(Resource):
 
 
 if __name__ == "__main__":
+    # db connection
     global_init('baza.db')
+    # resouces
     api.add_resource(UsersListResource, '/api/users')
     api.add_resource(UsersResource, '/api/users/<int:user_id>')
 
@@ -222,4 +238,5 @@ if __name__ == "__main__":
     api.add_resource(TestsListResource, '/api/tests')
     api.add_resource(QuestionListResource, '/api/questions')
     api.add_resource(QuestionResource, '/api/questions/<int:ques_id>')
+    # start working
     app.run()
