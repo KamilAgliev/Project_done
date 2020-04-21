@@ -1,4 +1,5 @@
 """MyEng - Телеграм бот для узучения английского языка"""
+# -*- coding: utf-8 -*-
 import random
 import sys
 
@@ -1525,11 +1526,11 @@ if __name__ == "__main__":
         flask_server = flask_server[:-1]
     print(f"Flask Server url was given: {flask_server}")
     FLASK_SERVER = flask_server
-    REQUEST_KWARGS = {
-        'proxy_url': 'socks5://localhost:9150',  # Адрес прокси сервера
-    }
-    updater = Updater(TOKEN_FOR_TELEGRAM_BOT, use_context=True, request_kwargs=REQUEST_KWARGS)
-    # updater = Updater(TOKEN_FOR_TELEGRAM_BOT, use_context=True)
+    # REQUEST_KWARGS = {
+    #     'proxy_url': 'socks5://localhost:9150',  # Адрес прокси сервера
+    # }
+    # updater = Updater(TOKEN_FOR_TELEGRAM_BOT, use_context=True, request_kwargs=REQUEST_KWARGS)
+    updater = Updater(TOKEN_FOR_TELEGRAM_BOT, use_context=True)
     dp = updater.dispatcher
     print("connected to bot")
     conv_handler = ConversationHandler(

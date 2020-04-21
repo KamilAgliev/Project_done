@@ -1,4 +1,5 @@
 """MyEng - Телеграм бот для узучения английского языка"""
+# -*- coding: utf-8 -*-
 from flask import jsonify
 from flask import Flask
 from flask_ngrok import run_with_ngrok
